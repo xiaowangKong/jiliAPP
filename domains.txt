@@ -1,12 +1,13 @@
 # TODO  App store domains
-http://shouji.baidu.com/
-http://http://app.mi.com/
-http://apk.hiapk.com/
-http://www.mumayi.com/
-http://itunes.apple.com/
-http://www.wandoujia.com/
-http://www.appchina.com/
-http://www.anzhi.com/
-http://app.xiaomi.com/
-http://cq01-un-web01.vm.baidu.com:8080/
-http://pan.baidu.com/
+# only enable "百度手机助手" for debugging
+百度手机助手 http://shouji.baidu.com/s?wd=
+#http://http://app.mi.com/
+#http://apk.hiapk.com/
+#http://www.mumayi.com/
+#http://itunes.apple.com/
+#http://www.wandoujia.com/
+#http://www.appchina.com/
+#http://www.anzhi.com/
+#http://app.xiaomi.com/
+#http://cq01-un-web01.vm.baidu.com:8080/
+#http://pan.baidu.com/
