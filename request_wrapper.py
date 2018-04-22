@@ -10,7 +10,7 @@ TIME_OUT = 1
 def get_html(url):
     url = urlsplit(url)
     url_parts = list(url)
-    for i in range(0, len(url)):
+    for i in range(0, len(url_parts)):
         if '=' in url_parts[i]:
             left = url_parts[i].split('=')[0]
             right = quote(url_parts[i].split('=')[1]) # to url encoding
