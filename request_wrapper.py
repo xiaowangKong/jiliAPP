@@ -3,19 +3,29 @@ from urllib.parse import urlsplit, quote, urlunsplit
 from urllib.error import URLError
 import socket
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36"
-TIME_OUT = 1
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/47.0.2526.73 Chrome/47.0.2526.73 Safari/537.36'
+TIME_OUT = 5
+#http://shouji.baidu.com/s?data_type=app&multi=0&ajax=1&wd=赚钱
+def encode_url_app_page(url):
+    right = url.strip().split('wd=')[1]
+    left = url.strip().split('wd=')[0]
+    right = quote(right) # to url encoding
+    url = left + 'wd=' + right
+    return url
 
-
-def get_html(url):
+def encode_url_main_page(url):
     url = urlsplit(url)
     url_parts = list(url)
     for i in range(0, len(url_parts)):
-        if '=' in url_parts[i]:
-            left = url_parts[i].split('=')[0]
-            right = quote(url_parts[i].split('=')[1]) # to url encoding
+        url_part = url_parts[i]
+        if '=' in url_part:
+            left = url_part.split('=')[0]
+            right = quote(url_part.split('=')[1])  # to url encoding
             url_parts[i] = left + '=' + right
     url = urlunsplit(url_parts)
+    return url
+
+def get_html(url): ##URL must be encoded!
     request = Request(url)
     request.add_header('User-Agent', USER_AGENT)
     page_code = None
