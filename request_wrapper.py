@@ -11,9 +11,10 @@ def get_html(url):
     url = urlsplit(url)
     url_parts = list(url)
     for i in range(0, len(url_parts)):
-        if '=' in url_parts[i]:
-            left = url_parts[i].split('=')[0]
-            right = quote(url_parts[i].split('=')[1]) # to url encoding
+        url_part = url_parts[i]
+        if '=' in url_part:
+            left = url_part.split('=')[0]
+            right = quote(url_part.split('=')[1])  # to url encoding
             url_parts[i] = left + '=' + right
     url = urlunsplit(url_parts)
     request = Request(url)
