@@ -1,126 +1,76 @@
-from file_parser import parse_list, parse_keyvalue, parse_filterwords
-from request_wrapper import get_html, encode_url_app_page,encode_url_main_page
-from bs4 import BeautifulSoup
+from file_parser import parse_list, parse_keyvalue_new, parse_filterwords
+from request_wrapper import get_html, encode_url_app_page, encode_url_main_page, get_url_root
+from html_parser import parse_app_list, parse_app_details
+from difflib import SequenceMatcher
+from file_saver import append_file
+import os
 
 
-def getAppList(app_page_baseurl,p,app_page_lasturl,main_baseurl,main_lasturl):
-    #第一页没有page那一项。
-    id = 1
-    res = {}
-    #url = baseurl + lasturl + str(id)
-    url = main_baseurl+main_lasturl
-    print (url)
-    page_code = get_html(url)
-    if page_code is None:
-        return []
-        # print(page_code)
-    print("读取main page **********************************")
-    soup = BeautifulSoup(page_code, 'html.parser')  # id="plist"
-    hidcomment = soup.find('ul', attrs={'class': 'app-list'})
-    item_list = hidcomment.find_all('div', attrs={'class': 'info'})
-    # print(item_list)
-    # http://shouji.baidu.com/s?data_type=app&multi=0&ajax=1&wd=%E8%B5%9A%E9%92%B1
-    for item in item_list:  # href="//item.jd.com/10002531129.html"
-        #  print item
-        app_href = str(item.find('a', attrs={'class', 'app-name'}).get('href')).strip()
-        app_name = str(item.find('a', attrs={'class', 'app-name'}).text).strip()
-        # print  content
-        app_id = app_href.split('/')[-1].split('.')[0]
-        # print(app_name)
-        # print(app_href)
-        # print(app_id)
-        if app_name in res:
-            continue
-        else:
-            res[app_name] = app_id
-    print('item_num：')
-    print(res)
-    # 下面从第一页上解析出总页面个数，然后循环读取
-    #从主页获取页面个数########################
-    page_num = int(soup.find('input',attrs={'class':'total-page'}).get('value'))
-    #page_num = 2
-    print(page_num)
+def search_app(search_entry_url, keyword):
+    request_url = search_entry_url + keyword
+    request_url = encode_url_main_page(request_url)
+    html_code = get_html(request_url)
+    res = None
+
     try:
-        for i in range(1,page_num):
-           print("i=")
-           print (i)
-           url = app_page_baseurl + app_page_lasturl + str(i)
-           print("url=")
-           print(url)
-           page_code = get_html(url)
-           #print(page_code)
-           if page_code is None:
-               return []
-           print("第%d次读取**********************************" % (i+1))
-           soup = BeautifulSoup(page_code, 'html.parser')  # id="plist"
-           hidcomment = soup.find('ul', attrs={'class': 'app-list'})
-           item_list = hidcomment.find_all('div', attrs={'class': 'info'})
-           #print(item_list)
-           for item in item_list:
-               #  print item
-               app_href = str(item.find('a', attrs={'class', 'app-name'}).get('href')).strip()
-               app_name = str(item.find('a', attrs={'class', 'app-name'}).text).strip()
-               # print  content
-               app_id = app_href.split('/')[-1].split('.')[0]
-               #print(app_name)
-               #print(app_href)
-               #print(app_id)
-               if app_name in res:
-                   continue
-               else:
-                   res[app_name] = app_id
-           print('item_num：')
-           print(res)
+        app_list = parse_app_list(html_code)
+    except RuntimeError as e:
+        print("ERR: an error occurred when searching %s" % keyword)
+        print(e)
         return res
-    except ValueError as e:
-      print (url)
-      print (e)
-      return res
-    except KeyError as e:
-      print (url)
-      print (e)
-      return res
-    except AttributeError as e:
-      print (url)
-      print (e)
-      return res
-    except Exception as e:
-      print (url)
-      print (e)
-      return res
+
+    if not app_list:
+        return res
+
+    # since, we may found a few Apps relative to the keyword,
+    # we just found the one which most similar to the keyword
+    for app_meta_info in app_list:
+        app_name = app_meta_info['app_name']
+        app_brief = app_meta_info['app_brief']
+        app_detailed_link = app_meta_info['app_detailed_link']
+
+        # if url start with a slash, which means this is a relative link.
+        # so, we need fix the link to a "full-url"
+        if app_detailed_link.startswith('/'):
+            app_detailed_link = get_url_root(search_entry_url) + app_detailed_link
+
+        name_similarity = SequenceMatcher(a=app_name, b=keyword).ratio()
+
+        if res is None or name_similarity > res['app_similarity']:
+            res = {'app_name': app_name,
+                   'app_brief': app_brief,
+                   'app_detailed_link': app_detailed_link,
+                   'app_similarity': name_similarity}
+
+    return res
 
 
-def getAppInfo(list,url1,url2,filter_words,file):
-    if(list == None or len(list)<=0):
-        print("applist is None!")
+def get_app_details(app_details_url):
+    request_url = encode_url_main_page(app_details_url)
+    html_code = get_html(request_url)
+    app_details = None
+
+    try:
+        app_details = parse_app_details(html_code)
+    except RuntimeError as e:
+        print("ERR: an error occurred when parsing %s" % app_details_url)
+        print(e)
+        return app_details
+
+    app_download_url = app_details['app_download_url']
+
+    if app_download_url.startswith('/'):
+        app_download_url = get_url_root(app_details_url) + app_download_url
+        app_details['app_download_url'] = app_download_url
+
+    return app_details
+
+
+def filterApp(info, filter_words):
+    if filter_words == None or len(filter_words) <= 0:
+        print("filter_words load failed！")
         return -1
-    for key in list:
-        url  = url1+list[key]+url2
-        page_code = get_html(url)
-        if page_code is None:
-            continue
-        soup = BeautifulSoup(page_code, 'html.parser')
-        hidcomment = soup.find('div', attrs={'class': 'introduction'}).find('div',attrs={'class': 'brief-long'})\
-            .find('p').text.strip()
-        print (hidcomment)
-        if filterApp(hidcomment,filter_words):
-            print ("点赚类")
-            f = open(file, 'a')
-            f.write(str(key))
-            f.write('\t')
-            f.write(str(url))
-            f.write('\t')
-            f.write(str(hidcomment))
-            f.write("\n")
-            f.close()
-        else:
-            print ('非点赚')
-
-def filterApp(info,filter_words):
-    if filter_words == None or len(filter_words) <=0:
-        print ("filter_words load failed！")
-        return -1
-    if info == None or len(info) <=0:
+    if info == None or len(info) <= 0:
         print("app info None！")
         return -1
     for round in filter_words:
@@ -133,34 +83,47 @@ def filterApp(info,filter_words):
             return False
     return True
 
+
+# TODO pause & resume features
+
 if __name__ == "__main__":
-    keywords = parse_list("keywords.txt")
-    search_entries = parse_keyvalue("domains.txt") #变成
-    filter_words = parse_filterwords("filterwords.txt")
-    resfile = "shouji.baidu.txt"
+    keywords = parse_list("input/small.sort")
+    search_entries = parse_keyvalue_new("input/domains_new.txt")
+    # resfile用于保存在shouji.baidu.com中找到的app的名字 下载地址 应用信息
+    resfile = "output/shouji.baidu_new.txt"
+    notfoundfile = "output/notfound.txt"
+
+    if not os.path.exists('output'):
+        os.mkdir('output')
+    else:
+        if os.path.exists(resfile):
+            os.remove(resfile)
+
+        # 用于保存没在当前shouji.baidu.com中找到的app名字
+        if os.path.exists(notfoundfile):
+            os.remove(notfoundfile)
+
     print('Supported appstores: %d' % len(search_entries))
 
     for appstore_name in search_entries:
-        print(appstore_name)
+        if len(search_entries[appstore_name]) < 1:
+            print("%sdomain.txt configure ERROR!" % appstore_name)
+            continue
+        print('searching from %s' % appstore_name)
+
         for keyword in keywords:
-            if len(search_entries[appstore_name]) < 2:
-                print("%sdomain.txt configure ERROR!" % appstore_name)
+            app_meta_info = search_app(search_entries[appstore_name], keyword)
+            if not app_meta_info:
+                print('WARN: cannot found: %s' % keyword)
+                append_file(notfoundfile, keyword)
                 continue
 
-            app_page_url = search_entries[appstore_name][1] + keyword
-            print(app_page_url)
-            app_page_url = encode_url_app_page(app_page_url)
-            print("requesting app page %s" % app_page_url)
-            main_url = search_entries[appstore_name][0]+ keyword
-            main_url = encode_url_main_page(main_url)
-            print("requesting main page %s" % main_url)
-            #http://shouji.baidu.com/s?wd=%E8%B5%9A%E9%92%B1
-            # &data_type=app&f=header_all%40input&from=web_alad_multi#page57
-            res = getAppList(app_page_url, 1, "&page=",main_url,"&data_type=app&f=header_all%40input%40btn_search&from=web_alad_multi")
-            #html_search_result = get_html("http://shouji.baidu.com/s?wd=%E8%B5%9A%E9%92%B1&data_type=app&f=header_all%40input&from=web_alad_multi#page2")
-            #http://shouji.baidu.com/s?data_type=app&multi=0&ajax=1&wd=%E8%B5%9A%E9%92%B1&page=1
-            #print(html_search_result)
-            print(res)
-            print(len(res))
-            #http://shouji.baidu.com/software/10177714.html 这是app下载页面格式
-            getAppInfo(res,"http://shouji.baidu.com/software/",".html",filter_words,resfile)
+            app_info = app_meta_info.copy()
+
+            app_detailed_info = get_app_details(app_meta_info['app_detailed_link'])
+            if app_detailed_info:
+                app_info.update(app_detailed_info)
+
+            append_file(resfile, str(app_info))
+
+            print('proceed: keyword %s found %s' % (keyword, app_info['app_name']))

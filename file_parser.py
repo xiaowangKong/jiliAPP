@@ -12,7 +12,7 @@ def parse_list(filename):
             if line.startswith("#"):
                 continue
             res.add(line)
-    return res
+    return sorted(res)
 
 
 def parse_keyvalue(filename):
