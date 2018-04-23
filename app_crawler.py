@@ -181,7 +181,7 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file):
         keywords = not_found  # we use up this app store, we need search rest of keywords from new store
 
     # we searched keywords from all App stores, bet still have keywords not found, save them!
-    append_file(notfound_file, "\n".join(keywords_backup))
+    write_file(notfound_file, "\n".join(keywords_backup))
 
 
 if __name__ == "__main__":
