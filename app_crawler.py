@@ -1,9 +1,13 @@
+import os
+from shutil import copyfile
+from multiprocessing.pool import ThreadPool
+from multiprocessing.context import TimeoutError
+# Above are our functions
 from file_parser import parse_list, parse_keyvalue_new, parse_filterwords
 from request_wrapper import get_html, encode_url_main_page, get_url_root
 from html_parser_baidu import parse_app_list as parse_app_list_baidu, parse_app_details as parse_app_details_baidu
 from html_parser_xiaomi import parse_app_list as parse_app_list_xiaomi, parse_app_details as parse_app_details_xiaomi
-from file_saver import append_file
-import os
+from file_saver import append_file, write_file
 
 
 def search_app(parse_app_list, search_entry_url, keyword):
@@ -61,6 +65,22 @@ def get_app_details(parse_app_details, app_details_url):
     return app_details
 
 
+def crawler(func_parse_app_list, func_parse_app_details, url_search_entry, keyword):
+    app_meta_info = search_app(func_parse_app_list, url_search_entry, keyword)
+    if not app_meta_info:
+        return None
+
+    app_info = app_meta_info.copy()
+
+    app_detailed_info = get_app_details(func_parse_app_details, app_meta_info['app_detailed_link'])
+
+    # we merge meta_info(app_name, app_brief,etc.) & details(app_brief_long, app_download_url)
+    if app_detailed_info:
+        app_info.update(app_detailed_info)
+
+    return app_info
+
+
 def filterApp(info, filter_words):
     if filter_words == None or len(filter_words) <= 0:
         print("filter_words load failed！")
@@ -79,24 +99,18 @@ def filterApp(info, filter_words):
     return True
 
 
-# TODO pause & resume features
+def main(keywords_file, domains_file, res_file, notfound_file, remained_file):
+    search_entries = parse_keyvalue_new(domains_file)
+    total_keywords = parse_list(keywords_file)
+    keywords = total_keywords
 
-if __name__ == "__main__":
-    keywords = parse_list("input/small.sort")
-    search_entries = parse_keyvalue_new("input/domains_new.txt")
-    # resfile用于保存在shouji.baidu.com中找到的app的名字 下载地址 应用信息
-    resfile = "output/shouji.baidu_new.txt"
-    notfoundfile = "output/notfound.txt"
-
-    if not os.path.exists('output'):
-        os.mkdir('output')
+    # for the first time running
+    if not os.path.exists(remained_file):
+        copyfile(keywords_file, remained_file)
+        print('INFO: not found remained keywords, starting from scratch')
     else:
-        if os.path.exists(resfile):
-            os.remove(resfile)
-
-        # 用于保存没在当前shouji.baidu.com中找到的app名字
-        if os.path.exists(notfoundfile):
-            os.remove(notfoundfile)
+        keywords = parse_list(remained_file)
+        print('Total keywords %d remained %d' % (len(total_keywords), len(keywords)))
 
     print('Supported appstores: %d' % len(search_entries))
 
@@ -105,6 +119,13 @@ if __name__ == "__main__":
                        '小米应用商店': {'func_parse_app_list': parse_app_list_xiaomi,
                                   'func_parse_app_details': parse_app_details_xiaomi}}
 
+    PARALLELISM = 8  # 8 process search keyword parallelly
+    TASK_TIMEOUT = 10
+
+    pool = ThreadPool(processes=PARALLELISM)
+
+    keywords_backup = keywords.copy()
+
     for appstore_name in search_entries:
         if len(search_entries[appstore_name]) < 1:
             print("%sdomain.txt configure ERROR!" % appstore_name)
@@ -112,29 +133,65 @@ if __name__ == "__main__":
         print('searching from %s' % appstore_name)
         func_parsers = function_mapper[appstore_name]
         func_parse_app_list = func_parsers['func_parse_app_list']
-        func_app_details = func_parsers['func_parse_app_details']
+        func_parse_app_details = func_parsers['func_parse_app_details']
+        url_search_entry = search_entries[appstore_name]
 
         not_found = []
-        for keyword in keywords:
-            app_meta_info = search_app(func_parse_app_list, search_entries[appstore_name], keyword)
-            if not app_meta_info:
-                print('WARN: cannot found: %s' % keyword)
-                append_file(notfoundfile, keyword)
-                not_found.append(keyword)
-                continue
+        # we take PARALLELISM keywords once
+        for idx_start in range(0, max(len(keywords), len(keywords) - PARALLELISM), PARALLELISM):
+            idx_end = min(len(keywords), idx_start + PARALLELISM)
+            future_tasks = []
 
-            app_info = app_meta_info.copy()
+            # launch a bunch of async tasks
+            for idx_keyword in range(idx_start, idx_end):
+                keyword = keywords[idx_keyword]
+                future_tasks.append({'keyword': keyword, 'task': pool.apply_async(crawler,
+                                                                                  (func_parse_app_list,
+                                                                                   func_parse_app_details,
+                                                                                   url_search_entry,
+                                                                                   keyword))})
 
-            app_detailed_info = get_app_details(func_app_details, app_meta_info['app_detailed_link'])
-            if app_detailed_info:
-                app_info.update(app_detailed_info)
+            for task_dict in future_tasks:
+                keyword = task_dict['keyword']
+                task = task_dict['task']
 
-            append_file(resfile, '%s\t%s\t%s\t%s' % (
-                app_info['app_name'],
-                app_info['app_brief_long'],
-                app_info['app_detailed_link'],
-                app_info['app_download_url']))
+                try:
+                    app_info = task.get(timeout=TASK_TIMEOUT)  # Waiting for task done
 
-            print('proceed: keyword %s found %s' % (keyword, app_info['app_name']))
+                    if app_info:
+                        # once we save 'keyword' to res_file, we remove the keyword from list
+                        keywords_backup.remove(keyword)
+                        write_file(remained_file, '\n'.join(keywords_backup))
 
-        keywords = not_found  # we use up this app sotre, we need search keywords from new store
+                        # save result
+                        append_file(res_file, '%s\t%s\t%s\t%s' % (
+                            app_info['app_name'],
+                            app_info['app_brief_long'],
+                            app_info['app_detailed_link'],
+                            app_info['app_download_url']))
+
+                        print('processed: keyword %s found %s' % (keyword, app_info['app_name']))
+                    else:
+                        not_found.append(keyword)
+                        print("WARN: can not found %s from %s" % (keyword, appstore_name))
+
+                except TimeoutError as e:
+                    print("WARN: Timeout when fetching %s" % keyword)
+
+        keywords = not_found  # we use up this app store, we need search rest of keywords from new store
+
+    # we searched keywords from all App stores, bet still have keywords not found, save them!
+    append_file(notfound_file, "\n".join(keywords_backup))
+
+
+if __name__ == "__main__":
+    if not os.path.exists('output'):
+        os.mkdir('output')
+
+    # resfile用于保存在shouji.baidu.com中找到的app的名字 下载地址 应用信息
+    main(keywords_file="input/small.sort",
+         domains_file="input/domains_new.txt",
+         res_file="output/shouji.baidu_new.txt",
+         remained_file="output/remained.txt",
+         notfound_file="output/notfound.txt")
+    print('All done!')
