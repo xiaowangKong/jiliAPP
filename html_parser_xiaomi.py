@@ -42,7 +42,6 @@ def parse_app_list(html_code):
 # '''
 
 def parse_app_details(html_code):
-    print(html_code)
     assert html_code
     soup = BeautifulSoup(html_code, 'html.parser')
 
