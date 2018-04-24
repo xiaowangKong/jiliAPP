@@ -1,6 +1,7 @@
 # TODO  App store domains new
 # only enable "百度手机助手" for debugging
-百度手机助手 http://shouji.baidu.com/s?wd=
+#百度手机助手 http://shouji.baidu.com/s?wd=
+小米应用商店 http://app.mi.com/search?keywords=
 #http://http://app.mi.com/
 #http://apk.hiapk.com/
 #http://www.mumayi.com/
