@@ -13,8 +13,13 @@ from file_saver import append_file, write_file
 def search_app(parse_app_list, search_entry_url, keyword):
     request_url = search_entry_url + keyword
     request_url = encode_url_main_page(request_url)
-    html_code = get_html(request_url)
     res = None
+
+    try:
+        html_code = get_html(request_url)
+    except RuntimeError as e:
+        print(e)
+        return res
 
     try:
         app_list = parse_app_list(html_code)
@@ -45,9 +50,15 @@ def search_app(parse_app_list, search_entry_url, keyword):
 
 
 def get_app_details(parse_app_details, app_details_url):
-    request_url = encode_url_main_page(app_details_url)
-    html_code = get_html(request_url)
+    # request_url = encode_url_main_page(app_details_url)
+    request_url = app_details_url
     app_details = None
+
+    try:
+        html_code = get_html(request_url)
+    except RuntimeError as e:
+        print(e)
+        return app_details
 
     try:
         app_details = parse_app_details(html_code)
@@ -120,7 +131,7 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file):
                                   'func_parse_app_details': parse_app_details_xiaomi}}
 
     PARALLELISM = 8  # 8 process search keyword parallelly
-    TASK_TIMEOUT = 10
+    TASK_TIMEOUT = 100
 
     pool = ThreadPool(processes=PARALLELISM)
 
