@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-
+import re
 html_test = '''
 you can paste HTML code here for debugging html_parser_xxx
 '''
@@ -48,16 +48,25 @@ def parse_app_details(html_code):
     tag_brief_long = soup.find('div', attrs={'class': 'app-text'})
     assert tag_brief_long
 
+
     tag_brief_long = tag_brief_long.find('p', attrs={'class': 'pslide'})
     assert tag_brief_long
-
+    '''
+    for tag in tag_brief_longs:
+        tag_brief_long = tag
+        break
+    '''
+    #print(tag_brief_long)
+    #tag_brief_long = re.match(r"<h3>应用介绍</h3><p class=\"pslide\">(.+?)<br/></p>", str(tag_brief_long))
+    print(tag_brief_long)
+    assert tag_brief_long
     tag_download_area = soup.find('div', attrs={'class': 'app-info-down'})
     assert tag_download_area
 
     tag_download_url = tag_download_area.find('a', attrs={'class': 'download'})
     assert tag_download_url
-
-    return {'app_brief_long': tag_brief_long.text.strip(),
+    hehe = tag_brief_long.text
+    return {'app_brief_long': tag_brief_long.text.replace("\r","").strip(),
             'app_download_url': tag_download_url.get('href').strip()}
 
 # print(parse_app_details(html_test))
