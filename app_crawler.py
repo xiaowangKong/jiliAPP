@@ -176,10 +176,10 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file):
 
                         # save result
                         append_file(res_file, '%s\t%s\t%s\t%s' % (
-                            app_info['app_name'],
-                            app_info['app_brief_long'],
-                            app_info['app_detailed_link'],
-                            app_info['app_download_url']))
+                            app_info['app_name'].replace('\n', ''),
+                            app_info['app_brief_long'].replace('\n', ''),
+                            app_info['app_detailed_link'].replace('\n', ''),
+                            app_info['app_download_url'].replace('\n', '')))
 
                         print('processed: keyword %s found %s' % (keyword, app_info['app_name']))
                     else:
