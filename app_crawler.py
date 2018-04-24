@@ -131,7 +131,7 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file):
                                   'func_parse_app_details': parse_app_details_xiaomi}}
 
     PARALLELISM = 8  # 8 process search keyword parallelly
-    TASK_TIMEOUT = 100
+    TASK_TIMEOUT = 10
 
     pool = ThreadPool(processes=PARALLELISM)
 

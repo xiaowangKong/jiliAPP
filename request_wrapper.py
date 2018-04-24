@@ -4,7 +4,7 @@ from urllib.error import URLError
 import socket
 
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/47.0.2526.73 Chrome/47.0.2526.73 Safari/537.36'
-TIME_OUT = 5
+TIME_OUT = 10
 
 
 # http://shouji.baidu.com/s?data_type=app&multi=0&ajax=1&wd=赚钱
