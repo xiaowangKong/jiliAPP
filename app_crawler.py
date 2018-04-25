@@ -172,16 +172,16 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
                           (keyword, app_info['app_name'], app_info['app_source']))
                 else:
                     not_found.append(keyword)
-                    write_file(notfound_file, "\n".join(not_found))
                     print("WARN: can not found %s" % keyword)
 
                 finished_keywords.remove(keyword)
-                write_file(remained_file, '\n'.join(finished_keywords))
                 print("left keywords: %d" % (len(finished_keywords)))
 
             except TimeoutError as e:
                 print("WARN: Timeout when fetching %s" % keyword)
 
+        write_file(remained_file, '\n'.join(finished_keywords))
+        write_file(notfound_file, "\n".join(not_found))
 
 if __name__ == "__main__":
     if not os.path.exists('output'):
