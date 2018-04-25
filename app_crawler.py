@@ -197,7 +197,7 @@ if __name__ == "__main__":
 
     # resfile用于保存在shouji.baidu.com中找到的app的名字 下载地址 应用信息
     main(keywords_file="input/small.sort",
-         domains_file="input/domains_new.txt",
+         domains_file="input/domains.txt",
          res_file="output/shouji.baidu_new.txt",
          remained_file="output/remained.txt",
          notfound_file="output/notfound.txt")
