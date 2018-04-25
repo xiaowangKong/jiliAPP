@@ -1,5 +1,5 @@
 import os
-from socket import timeout
+
 from shutil import copyfile
 from multiprocessing.pool import ThreadPool
 from multiprocessing.context import TimeoutError
@@ -18,9 +18,6 @@ def search_app(parse_app_list, search_entry_url, keyword):
 
     try:
         html_code = get_html(request_url)
-    except timeout as e:
-        print(e)
-        return None
     except RuntimeError as e:
         print(e)
         return None
@@ -60,9 +57,6 @@ def get_app_details(parse_app_details, app_details_url):
 
     try:
         html_code = get_html(request_url)
-    except timeout as e:
-        print(e)
-        return None
     except RuntimeError as e:
         print(e)
         return None
