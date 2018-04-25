@@ -66,7 +66,7 @@ def parse_app_details(html_code):
     assert tag_download_url
     #hehe = tag_brief_long.text
    # hehehe = hehe.replace("\r","")
-    return {'app_brief_long': tag_brief_long.text.replace("\r","").strip(),
+    return {'app_brief_long': tag_brief_long.text.strip(),
             'app_download_url': tag_download_url.get('href').strip()}
 
 # print(parse_app_details(html_test))
