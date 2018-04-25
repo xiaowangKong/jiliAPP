@@ -91,6 +91,20 @@ def crawler(func_parse_app_list, func_parse_app_details, url_search_entry, keywo
 
     return app_info
 
+def crawler_multi(function_mapper,search_entries,keyword):
+    if(search_entries == None or len(search_entries) < 1):
+        print("search_entries configure err!")
+        return None
+    app_info = None
+    for appstore_name in search_entries:
+        func_parsers = function_mapper[appstore_name]
+        func_parse_app_list = func_parsers['func_parse_app_list']
+        func_parse_app_details = func_parsers['func_parse_app_details']
+        url_search_entry = search_entries[appstore_name]
+        app_info = crawler(func_parse_app_list,func_parse_app_details,url_search_entry,keyword)
+        if app_info:
+            return app_info
+    return app_info
 
 def filterApp(info, filter_words):
     if filter_words == None or len(filter_words) <= 0:
@@ -137,62 +151,55 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file):
 
     keywords_backup = keywords.copy()
 
-    for appstore_name in search_entries:
-        if len(search_entries[appstore_name]) < 1:
-            print("%sdomain.txt configure ERROR!" % appstore_name)
-            continue
-        print('searching from %s' % appstore_name)
-        func_parsers = function_mapper[appstore_name]
-        func_parse_app_list = func_parsers['func_parse_app_list']
-        func_parse_app_details = func_parsers['func_parse_app_details']
-        url_search_entry = search_entries[appstore_name]
 
-        not_found = []
+    if len(search_entries) < 1:
+        print("%sdomain_new.txt configure ERROR!")
+        return
+    not_found = []
         # we take PARALLELISM keywords once
-        for idx_start in range(0, max(len(keywords), len(keywords) - PARALLELISM), PARALLELISM):
-            idx_end = min(len(keywords), idx_start + PARALLELISM)
-            future_tasks = []
+    for idx_start in range(0, len(keywords), PARALLELISM):
+        idx_end = min(len(keywords), idx_start + PARALLELISM)
+        future_tasks = []
 
-            # launch a bunch of async tasks
-            for idx_keyword in range(idx_start, idx_end):
-                keyword = keywords[idx_keyword]
-                future_tasks.append({'keyword': keyword, 'task': pool.apply_async(crawler,
-                                                                                  (func_parse_app_list,
-                                                                                   func_parse_app_details,
-                                                                                   url_search_entry,
+        # launch a bunch of async tasks
+        for idx_keyword in range(idx_start, idx_end):
+            keyword = keywords[idx_keyword]
+            future_tasks.append({'keyword': keyword, 'task': pool.apply_async(crawler_multi,
+                                                                                  (function_mapper,
+                                                                                   search_entries,
                                                                                    keyword))})
 
-            for task_dict in future_tasks:
-                keyword = task_dict['keyword']
-                task = task_dict['task']
+        for task_dict in future_tasks:
+            keyword = task_dict['keyword']
+            task = task_dict['task']
 
-                try:
-                    app_info = task.get(timeout=TASK_TIMEOUT)  # Waiting for task done
+            try:
+                app_info = task.get(timeout=TASK_TIMEOUT)  # Waiting for task done
 
-                    if app_info:
-                        # once we save 'keyword' to res_file, we remove the keyword from list
-                        keywords_backup.remove(keyword)
-                        write_file(remained_file, '\n'.join(keywords_backup))
+                if app_info:
+                    # once we save 'keyword' to res_file, we remove the keyword from list
+                    keywords_backup.remove(keyword)
+                    write_file(remained_file, '\n'.join(keywords_backup))
 
-                        # save result
-                        append_file(res_file, '%s\t%s\t%s\t%s' % (
-                            app_info['app_name'].replace('\n', ''),
-                            app_info['app_brief_long'].replace('\n', ''),
-                            app_info['app_detailed_link'].replace('\n', ''),
-                            app_info['app_download_url'].replace('\n', '')))
+                    # save result
+                    append_file(res_file, '%s\t%s\t%s\t%s' % (
+                        app_info['app_name'].replace('\n', ''),
+                        app_info['app_brief_long'].replace('\n', ''),
+                        app_info['app_detailed_link'].replace('\n', ''),
+                        app_info['app_download_url'].replace('\n', '')))
 
-                        print('processed: keyword %s found %s' % (keyword, app_info['app_name']))
-                    else:
-                        not_found.append(keyword)
-                        print("WARN: can not found %s from %s" % (keyword, appstore_name))
+                    print('processed: keyword %s found %s' % (keyword, app_info['app_name']))
+                else:
+                    not_found.append(keyword)
+                    print("WARN: can not found %s" % keyword)
 
-                except TimeoutError as e:
+            except TimeoutError as e:
                     print("WARN: Timeout when fetching %s" % keyword)
 
-        keywords = not_found  # we use up this app store, we need search rest of keywords from new store
+        keywords = keywords_backup  # we use up this app store, we need search rest of keywords from new store
 
     # we searched keywords from all App stores, bet still have keywords not found, save them!
-    write_file(notfound_file, "\n".join(keywords_backup))
+    write_file(notfound_file, "\n".join(not_found))
 
 
 if __name__ == "__main__":

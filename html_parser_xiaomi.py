@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-import re
 html_test = '''
 you can paste HTML code here for debugging html_parser_xxx
 '''
@@ -65,7 +64,8 @@ def parse_app_details(html_code):
 
     tag_download_url = tag_download_area.find('a', attrs={'class': 'download'})
     assert tag_download_url
-    hehe = tag_brief_long.text
+    #hehe = tag_brief_long.text
+   # hehehe = hehe.replace("\r","")
     return {'app_brief_long': tag_brief_long.text.replace("\r","").strip(),
             'app_download_url': tag_download_url.get('href').strip()}
 
