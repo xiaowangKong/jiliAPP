@@ -166,11 +166,11 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
 
                     # save result
                     append_file(res_file, '%s\t%s\t%s\t%s\t%s' % (
-                        "".join(app_info['app_source'].splitlines()),
-                        "".join(app_info['app_name'].splitlines()),
-                        "".join(app_info['app_brief_long'].splitlines()),
-                        "".join(app_info['app_detailed_link'].splitlines()),
-                        "".join(app_info['app_download_url'].splitlines())))
+                        "".join(app_info.get('app_source', 'null').splitlines()),
+                        "".join(app_info.get('app_name', 'null').splitlines()),
+                        "".join(app_info.get('app_brief_long', 'null').splitlines()),
+                        "".join(app_info.get('app_detailed_link', 'null').splitlines()),
+                        "".join(app_info.get('app_download_url', 'null').splitlines())))
 
                     print('processed: keyword %s found %s from %s' %
                           (keyword, app_info['app_name'], app_info['app_source']))
