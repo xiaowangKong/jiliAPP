@@ -110,7 +110,7 @@ def crawler_multi(function_mapper, search_entries, keyword):
     return app_info
 
 
-def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PARALLELISM=8, TASK_TIMEOUT=20):
+def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PARALLELISM=32, TASK_TIMEOUT=20):
     search_entries = parse_keyvalue_new(domains_file)
     total_keywords = parse_list(keywords_file)
     keywords = total_keywords
@@ -160,10 +160,6 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
                 app_info = task.get(timeout=TASK_TIMEOUT)  # Waiting for task done
 
                 if app_info:
-                    # once we save 'keyword' to res_file, we remove the keyword from list
-                    finished_keywords.remove(keyword)
-                    write_file(remained_file, '\n'.join(finished_keywords))
-
                     # save result
                     append_file(res_file, '%s\t%s\t%s\t%s\t%s' % (
                         "".join(app_info.get('app_source', 'null').splitlines()),
@@ -179,6 +175,10 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
                     write_file(notfound_file, "\n".join(not_found))
                     print("WARN: can not found %s" % keyword)
 
+                finished_keywords.remove(keyword)
+                write_file(remained_file, '\n'.join(finished_keywords))
+                print("left keywords: %d" % (len(finished_keywords)))
+
             except TimeoutError as e:
                 print("WARN: Timeout when fetching %s" % keyword)
 
@@ -188,7 +188,7 @@ if __name__ == "__main__":
         os.mkdir('output')
 
     # resfile用于保存在shouji.baidu.com中找到的app的名字 下载地址 应用信息
-    main(keywords_file="input/small.sort",
+    main(keywords_file="input/app_name.sort",
          domains_file="input/domains.txt",
          res_file="output/shouji.baidu_new.txt",
          remained_file="output/remained.txt",
