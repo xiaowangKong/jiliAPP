@@ -176,13 +176,11 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
                           (keyword, app_info['app_name'], app_info['app_source']))
                 else:
                     not_found.append(keyword)
+                    write_file(notfound_file, "\n".join(not_found))
                     print("WARN: can not found %s" % keyword)
 
             except TimeoutError as e:
                 print("WARN: Timeout when fetching %s" % keyword)
-
-    # we searched keywords from all App stores, bet still have keywords not found, save them!
-    write_file(notfound_file, "\n".join(not_found))
 
 
 if __name__ == "__main__":
