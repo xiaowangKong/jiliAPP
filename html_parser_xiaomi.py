@@ -57,7 +57,7 @@ def parse_app_details(html_code):
     '''
     #print(tag_brief_long)
     #tag_brief_long = re.match(r"<h3>应用介绍</h3><p class=\"pslide\">(.+?)<br/></p>", str(tag_brief_long))
-    print(tag_brief_long)
+    # print(tag_brief_long)
     assert tag_brief_long
     tag_download_area = soup.find('div', attrs={'class': 'app-info-down'})
     assert tag_download_area
