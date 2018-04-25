@@ -114,6 +114,7 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
     search_entries = parse_keyvalue_new(domains_file)
     total_keywords = parse_list(keywords_file)
     keywords = total_keywords
+    not_found = []
 
     if len(search_entries) == 0:
         print("ERR: search_entries configure err!")
@@ -127,6 +128,9 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
         keywords = parse_list(remained_file)
         print('Total keywords %d remained %d' % (len(total_keywords), len(keywords)))
 
+    if os.path.exists(notfound_file):
+        not_found = parse_list(notfound_file)
+
     print('Supported appstores: %d' % len(search_entries))
 
     function_mapper = {'百度手机助手': {'func_parse_app_list': parse_app_list_baidu,
@@ -138,7 +142,6 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
 
     finished_keywords = keywords.copy()
 
-    not_found = []
     # we take PARALLELISM keywords once
     for idx_start in range(0, len(keywords), PARALLELISM):
         idx_end = min(len(keywords), idx_start + PARALLELISM)
