@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+
 html_test = '''
 you can paste HTML code here for debugging html_parser_xxx
 '''
@@ -20,9 +21,16 @@ def parse_app_list(html_code):
     res_list = []
 
     for tag_app in tag_app_list:
-        tag_app_link = tag_app.find('h5').find('a')
-        tag_app_brief = tag_app.find('p', {'class': 'app-desc'}).find('a')
+        tag_app_link = tag_app.find('h5')
         assert tag_app_link
+
+        tag_app_link = tag_app_link.find('a')
+        assert tag_app_link
+
+        tag_app_brief = tag_app.find('p', {'class': 'app-desc'})
+        assert tag_app_brief
+
+        tag_app_brief = tag_app_brief.find('a')
         assert tag_app_brief
 
         app_name = tag_app_link.text.strip()
@@ -47,7 +55,6 @@ def parse_app_details(html_code):
     tag_brief_long = soup.find('div', attrs={'class': 'app-text'})
     assert tag_brief_long
 
-
     tag_brief_long = tag_brief_long.find('p', attrs={'class': 'pslide'})
     assert tag_brief_long
     '''
@@ -55,17 +62,16 @@ def parse_app_details(html_code):
         tag_brief_long = tag
         break
     '''
-    #print(tag_brief_long)
-    #tag_brief_long = re.match(r"<h3>应用介绍</h3><p class=\"pslide\">(.+?)<br/></p>", str(tag_brief_long))
     # print(tag_brief_long)
-    assert tag_brief_long
+    # tag_brief_long = re.match(r"<h3>应用介绍</h3><p class=\"pslide\">(.+?)<br/></p>", str(tag_brief_long))
+    # print(tag_brief_long)
     tag_download_area = soup.find('div', attrs={'class': 'app-info-down'})
     assert tag_download_area
 
     tag_download_url = tag_download_area.find('a', attrs={'class': 'download'})
     assert tag_download_url
-    #hehe = tag_brief_long.text
-   # hehehe = hehe.replace("\r","")
+    # hehe = tag_brief_long.text
+    # hehehe = hehe.replace("\r","")
     return {'app_brief_long': tag_brief_long.text.strip(),
             'app_download_url': tag_download_url.get('href').strip()}
 

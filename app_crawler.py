@@ -18,13 +18,8 @@ def search_app(parse_app_list, search_entry_url, keyword):
 
     try:
         html_code = get_html(request_url)
-    except Exception as e:
-        print(e)
-        return None
-
-    try:
         app_list = parse_app_list(html_code)
-    except RuntimeError as e:
+    except Exception as e:
         print("ERR: an error occurred when searching %s" % keyword)
         print(e)
         return None
@@ -57,13 +52,8 @@ def get_app_details(parse_app_details, app_details_url):
 
     try:
         html_code = get_html(request_url)
-    except Exception as e:
-        print(e)
-        return None
-
-    try:
         app_details = parse_app_details(html_code)
-    except RuntimeError as e:
+    except Exception as e:
         print("ERR: an error occurred when parsing %s" % app_details_url)
         print(e)
         return None
@@ -110,7 +100,7 @@ def crawler_multi(function_mapper, search_entries, keyword):
     return app_info
 
 
-def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PARALLELISM=64, TASK_TIMEOUT=20):
+def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PARALLELISM=32, TASK_TIMEOUT=20):
     search_entries = parse_keyvalue_new(domains_file)
     total_keywords = parse_list(keywords_file)
     keywords = total_keywords

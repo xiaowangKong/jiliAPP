@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 
+
 def parse_app_list(html_code):
     assert html_code
     soup = BeautifulSoup(html_code, 'html.parser')
@@ -34,8 +35,13 @@ def parse_app_details(html_code):
     assert html_code
     soup = BeautifulSoup(html_code, 'html.parser')
 
-    tag_brief_long = soup.find('div', attrs={'class': 'introduction'}).find('div', attrs={'class': 'brief-long'}) \
-        .find('p')
+    tag_brief_long = soup.find('div', attrs={'class': 'introduction'})
+    assert tag_brief_long
+
+    tag_brief_long = tag_brief_long.find('div', attrs={'class': 'brief-long'})
+    assert tag_brief_long
+
+    tag_brief_long = tag_brief_long.find('p')
     assert tag_brief_long
 
     tag_download_area = soup.find('div', attrs={'class': 'area-download'})
