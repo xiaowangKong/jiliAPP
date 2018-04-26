@@ -6,6 +6,7 @@ from shutil import copyfile
 from multiprocessing.pool import ThreadPool
 from multiprocessing.context import TimeoutError
 # Above are our functions
+import encoding_settings
 from file_parser import parse_list, parse_keyvalue_new
 from request_wrapper import get_html, encode_url_main_page, get_url_root
 from html_parser_baidu import parse_app_list as parse_app_list_baidu, parse_app_details as parse_app_details_baidu
