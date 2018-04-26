@@ -187,9 +187,9 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
                 finished_keywords.remove(keyword)
                 elasped_clk = time.time() - begin_clk
                 print("Left keywords: %d "
-                      "Searching speed: %f keywords/s "
-                      "(Valid searching speed: %d keywords/s) "
-                      "Success Rate: %f %%" %
+                      "Searching speed: %.2f keywords/s "
+                      "(Valid searching speed: %.2f keywords/s) "
+                      "Success Rate: %.2f %%" %
                       (len(finished_keywords),
                        searched_keywords / elasped_clk,
                        valid_keywords / elasped_clk,
