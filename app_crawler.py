@@ -126,12 +126,13 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
         print('INFO: not found remained keywords, starting from scratch')
     else:
         keywords = parse_list(remained_file)
-        print('Total keywords %d remained %d' % (len(total_keywords), len(keywords)))
+        print('INFO: Total keywords %d remained %d' % (len(total_keywords), len(keywords)))
 
     if os.path.exists(notfound_file):
         not_found = parse_list(notfound_file)
+        print("INFO: restored %d not found keywords" % len(not_found))
 
-    print('Supported appstores: %d' % len(search_entries))
+    print('INFO: Supported appstores: %d' % len(search_entries))
 
     function_mapper = {'百度手机助手': {'func_parse_app_list': parse_app_list_baidu,
                                   'func_parse_app_details': parse_app_details_baidu},
@@ -178,7 +179,7 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
                         "".join(app_info.get('app_detailed_link', 'null').splitlines()),
                         "".join(app_info.get('app_download_url', 'null').splitlines())))
 
-                    print('processed: keyword %s found %s from %s' %
+                    print('INFO: keyword %s found %s from %s' %
                           (keyword, app_info['app_name'], app_info['app_source']))
                 else:
                     not_found.append(keyword)
@@ -186,7 +187,7 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
 
                 finished_keywords.remove(keyword)
                 elasped_clk = time.time() - begin_clk
-                print("Left keywords: %d "
+                print("INFO: Left keywords: %d "
                       "Searching speed: %.2f keywords/s "
                       "(Valid searching speed: %.2f keywords/s) "
                       "Success Rate: %.2f %%" %
@@ -212,4 +213,4 @@ if __name__ == "__main__":
          res_file="output/shouji.baidu_new.txt",
          remained_file="output/remained.txt",
          notfound_file="output/notfound.txt")
-    print('All done!')
+    print('INFO: All done!')
