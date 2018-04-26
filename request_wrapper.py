@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from urllib.request import Request, urlopen
 from urllib.parse import urlsplit, quote, urlunsplit
 from urllib.error import URLError
