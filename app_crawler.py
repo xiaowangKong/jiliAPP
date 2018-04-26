@@ -1,5 +1,5 @@
 import os
-
+import time
 from shutil import copyfile
 from multiprocessing.pool import ThreadPool
 from multiprocessing.context import TimeoutError
@@ -142,7 +142,12 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
 
     finished_keywords = keywords.copy()
 
+    begin_clk = time.time()
+    valid_keywords = 0
+    searched_keywords = 0
+
     # we take PARALLELISM keywords once
+
     for idx_start in range(0, len(keywords), PARALLELISM):
         idx_end = min(len(keywords), idx_start + PARALLELISM)
         future_tasks = []
@@ -161,8 +166,10 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
 
             try:
                 app_info = task.get(timeout=TASK_TIMEOUT)  # Waiting for task done
+                searched_keywords += 1
 
                 if app_info:
+                    valid_keywords += 1
                     # save result
                     append_file(res_file, '%s\t%s\t%s\t%s\t%s' % (
                         "".join(app_info.get('app_source', 'null').splitlines()),
@@ -178,13 +185,22 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
                     print("WARN: can not found %s" % keyword)
 
                 finished_keywords.remove(keyword)
-                print("left keywords: %d" % (len(finished_keywords)))
+                elasped_clk = time.time() - begin_clk
+                print("Left keywords: %d "
+                      "Searching speed: %f keywords/s "
+                      "(Valid searching speed: %d keywords/s) "
+                      "Success Rate: %f %%" %
+                      (len(finished_keywords),
+                       searched_keywords / elasped_clk,
+                       valid_keywords / elasped_clk,
+                       valid_keywords / searched_keywords))
 
             except TimeoutError as e:
                 print("WARN: Timeout when fetching %s" % keyword)
 
         write_file(remained_file, '\n'.join(finished_keywords))
         write_file(notfound_file, "\n".join(not_found))
+
 
 if __name__ == "__main__":
     if not os.path.exists('output'):
