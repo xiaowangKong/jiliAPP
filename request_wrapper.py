@@ -5,7 +5,7 @@ from urllib.error import URLError
 from socket import timeout
 
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/47.0.2526.73 Chrome/47.0.2526.73 Safari/537.36'
-TIME_OUT = 10
+TIME_OUT = 20
 
 
 # http://shouji.baidu.com/s?data_type=app&multi=0&ajax=1&wd=赚钱
@@ -62,3 +62,26 @@ def get_html(url):  ##URL must be encoded!
         raise e
 
     return page_code
+
+
+def get_redirect_url(url):  ##URL must be encoded!
+    request = Request(url)
+    request.add_header('User-Agent', USER_AGENT)
+
+    try:
+        with urlopen(request, timeout=TIME_OUT) as response:
+            resp_url = response.geturl()
+    except URLError as e:
+        print("ERR: error occurred when fetching: %s" % url)
+        raise e
+    except ConnectionResetError as e:
+        print("ERR: ConnectionResetError %s" % url)
+        raise e
+    except timeout as e:
+        print("ERR: Timeout when fetching: %s" % url)
+        raise e
+
+    return resp_url
+
+url = get_redirect_url('https://down.mumayi.com/510158')
+print(url)
