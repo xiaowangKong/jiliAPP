@@ -8,18 +8,19 @@ from multiprocessing.context import TimeoutError
 # Above are our functions
 import encoding_settings
 from file_parser import parse_list, parse_keyvalue_new
-from request_wrapper import get_html, encode_url_main_page, get_url_root,get_redirect_url
+from request_wrapper import get_html, encode_url_main_page, get_url_root
 from html_parser_baidu import parse_app_list as parse_app_list_baidu, parse_app_details as parse_app_details_baidu
 from html_parser_xiaomi import parse_app_list as parse_app_list_xiaomi, parse_app_details as parse_app_details_xiaomi
 from html_parser_mumayi import parse_app_list as parse_app_list_mumayi, parse_app_details as parse_app_details_mumayi
+from html_parser_wandoujia import parse_app_list as parse_app_list_wandoujia, parse_app_details as parse_app_details_wandoujia
 from file_saver import append_file, write_file
 
 
 def search_app(parse_app_list, search_entry_url, keyword):
     request_url = search_entry_url + keyword
-    print(request_url)
+    #print(request_url)
     request_url = encode_url_main_page(request_url)
-    print(request_url)
+    #print(request_url)
     matched_app_meta_info = None
 
     try:
@@ -137,7 +138,9 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
                        '小米应用商店': {'func_parse_app_list': parse_app_list_xiaomi,
                                   'func_parse_app_details': parse_app_details_xiaomi},
                        '木蚂蚁': {'func_parse_app_list': parse_app_list_mumayi,
-                               'func_parse_app_details': parse_app_details_mumayi}
+                               'func_parse_app_details': parse_app_details_mumayi},
+                       '豌豆荚':{'func_parse_app_list': parse_app_list_wandoujia,
+                              'func_parse_app_details': parse_app_details_wandoujia}
                        }
 
     pool = ThreadPool(processes=PARALLELISM)
@@ -209,7 +212,7 @@ if __name__ == "__main__":
         os.mkdir('output')
 
     # resfile用于保存在shouji.baidu.com中找到的app的名字 下载地址 应用信息
-    main(keywords_file="input/one.sort",
+    main(keywords_file="input/small.sort",
          domains_file="input/domains.txt",
          res_file="output/shouji.baidu_new.txt",
          remained_file="output/remained.txt",

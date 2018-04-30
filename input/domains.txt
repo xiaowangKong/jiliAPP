@@ -2,7 +2,7 @@
 #百度手机助手 http://shouji.baidu.com/s?wd=
 #小米应用商店 http://app.mi.com/search?keywords=
 #http://apk.hiapk.com/ not an appstore anymore, give up
-木蚂蚁 http://s.mumayi.com/index.php?q=
+#木蚂蚁 http://s.mumayi.com/index.php?q=
 #http://itunes.apple.com/
 豌豆荚 http://www.wandoujia.com/search?key=
 #http://www.appchina.com/

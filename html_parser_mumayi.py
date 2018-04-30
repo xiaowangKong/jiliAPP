@@ -60,12 +60,15 @@ def parse_app_details(html_code):
     # print(tag_brief_long)
     # tag_brief_long = re.match(r"<h3>应用介绍</h3><p class=\"pslide\">(.+?)<br/></p>", str(tag_brief_long))
     # print(tag_brief_long)
-    tag_download_area = soup.find('a', attrs={'class': 'iwand','title':'百度合作高速下载'})
+    tag_download_area = soup.find('a', attrs={'class': 'dl-icon'})
     assert tag_download_area
-
+    tag_download_area = tag_download_area.get('href')
+    assert tag_download_area
+    tag_download_area = get_redirect_url(tag_download_area)
+    assert tag_download_area
     # hehe = tag_brief_long.text
     # hehehe = hehe.replace("\r","")
     return {'app_brief_long': tag_brief_long.text.strip(),
-            'app_download_url': tag_download_area.get('href').strip()}
+            'app_download_url': tag_download_area.strip()}
 
 # print(parse_app_details(html_test))
