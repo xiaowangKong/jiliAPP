@@ -34,6 +34,8 @@ def parse_app_list(html_code):
 
 def parse_app_details(html_code):
     assert html_code
+    #print("html")
+  #  print(html_code)
     soup = BeautifulSoup(html_code, 'html.parser')
 
     tag_brief_long = soup.find('div', attrs={'class': 'introduction'})

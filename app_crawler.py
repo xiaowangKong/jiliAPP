@@ -8,15 +8,18 @@ from multiprocessing.context import TimeoutError
 # Above are our functions
 import encoding_settings
 from file_parser import parse_list, parse_keyvalue_new
-from request_wrapper import get_html, encode_url_main_page, get_url_root
+from request_wrapper import get_html, encode_url_main_page, get_url_root,get_redirect_url
 from html_parser_baidu import parse_app_list as parse_app_list_baidu, parse_app_details as parse_app_details_baidu
 from html_parser_xiaomi import parse_app_list as parse_app_list_xiaomi, parse_app_details as parse_app_details_xiaomi
+from html_parser_mumayi import parse_app_list as parse_app_list_mumayi, parse_app_details as parse_app_details_mumayi
 from file_saver import append_file, write_file
 
 
 def search_app(parse_app_list, search_entry_url, keyword):
     request_url = search_entry_url + keyword
+    print(request_url)
     request_url = encode_url_main_page(request_url)
+    print(request_url)
     matched_app_meta_info = None
 
     try:
@@ -93,6 +96,8 @@ def crawler_multi(function_mapper, search_entries, keyword):
         func_parsers = function_mapper[appstore_name]
         func_parse_app_list = func_parsers['func_parse_app_list']
         func_parse_app_details = func_parsers['func_parse_app_details']
+        if (appstore_name not in search_entries):
+            continue
         url_search_entry = search_entries[appstore_name]
         app_info = crawler(func_parse_app_list, func_parse_app_details, url_search_entry, keyword)
 
@@ -103,7 +108,7 @@ def crawler_multi(function_mapper, search_entries, keyword):
     return app_info
 
 
-def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PARALLELISM=32, TASK_TIMEOUT=20):
+def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PARALLELISM=32, TASK_TIMEOUT=1000000):
     search_entries = parse_keyvalue_new(domains_file)
     total_keywords = parse_list(keywords_file)
     keywords = total_keywords
@@ -130,7 +135,10 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
     function_mapper = {'百度手机助手': {'func_parse_app_list': parse_app_list_baidu,
                                   'func_parse_app_details': parse_app_details_baidu},
                        '小米应用商店': {'func_parse_app_list': parse_app_list_xiaomi,
-                                  'func_parse_app_details': parse_app_details_xiaomi}}
+                                  'func_parse_app_details': parse_app_details_xiaomi},
+                       '木蚂蚁': {'func_parse_app_list': parse_app_list_mumayi,
+                               'func_parse_app_details': parse_app_details_mumayi}
+                       }
 
     pool = ThreadPool(processes=PARALLELISM)
 
@@ -201,7 +209,7 @@ if __name__ == "__main__":
         os.mkdir('output')
 
     # resfile用于保存在shouji.baidu.com中找到的app的名字 下载地址 应用信息
-    main(keywords_file="input/app_name.sort",
+    main(keywords_file="input/one.sort",
          domains_file="input/domains.txt",
          res_file="output/shouji.baidu_new.txt",
          remained_file="output/remained.txt",

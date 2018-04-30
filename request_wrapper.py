@@ -5,7 +5,7 @@ from urllib.error import URLError
 from socket import timeout
 
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/47.0.2526.73 Chrome/47.0.2526.73 Safari/537.36'
-TIME_OUT = 20
+TIME_OUT = 10
 
 
 # http://shouji.baidu.com/s?data_type=app&multi=0&ajax=1&wd=赚钱
@@ -62,7 +62,6 @@ def get_html(url):  ##URL must be encoded!
         raise e
 
     return page_code
-
 
 def get_redirect_url(url):  ##URL must be encoded!
     request = Request(url)
