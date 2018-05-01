@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup
-from request_wrapper import get_redirect_url
+from request_wrapper import get_redirect_url, get_html
 
 html_test = '''
 you can paste HTML code here for debugging html_parser_xxx
@@ -15,7 +15,7 @@ def parse_app_list(html_code):
     if not tag_app_list:
         raise RuntimeError("can't found <ul class:applist>")
 
-    tag_app_list = tag_app_list.find_all('li',attrs={'class':'iapp'})
+    tag_app_list = tag_app_list.find_all('li', attrs={'class': 'iapp'})
 
     if not tag_app_list:
         raise RuntimeError("can't found <li>")
@@ -23,7 +23,7 @@ def parse_app_list(html_code):
     res_list = []
 
     for tag_app in tag_app_list:
-        tag_app_link = tag_app.find('a',attrs={'class':'agray'})
+        tag_app_link = tag_app.find('a', attrs={'class': 'agray'})
         assert tag_app_link
         app_name = tag_app_link.get('title').strip()
         app_brief = tag_app_link.find('p').text.strip()
@@ -49,17 +49,13 @@ def parse_app_details(html_code):
 
     tag_brief_long = tag.find('div', attrs={'class': 'ibor w668 mart10 hidden'})
     assert tag_brief_long
-    tag_brief_long = tag_brief_long.find('div',attrs={'class':'ibox'})
+    tag_brief_long = tag_brief_long.find('div', attrs={'class': 'ibox'})
+
+    tag_brief_long = tag_brief_long.find_all('p')
     assert tag_brief_long
-    tag_brief_long = tag_brief_long.find('p')
-    '''
-    for tag in tag_brief_longs:
-        tag_brief_long = tag
-        break
-    '''
-    # print(tag_brief_long)
-    # tag_brief_long = re.match(r"<h3>应用介绍</h3><p class=\"pslide\">(.+?)<br/></p>", str(tag_brief_long))
-    # print(tag_brief_long)
+
+    brief_long = "".join([tag_p.text.strip() for tag_p in tag_brief_long])
+
     tag_download_area = soup.find('a', attrs={'class': 'dl-icon'})
     assert tag_download_area
     tag_download_area = tag_download_area.get('href')
@@ -68,7 +64,9 @@ def parse_app_details(html_code):
     assert tag_download_area
     # hehe = tag_brief_long.text
     # hehehe = hehe.replace("\r","")
-    return {'app_brief_long': tag_brief_long.text.strip(),
+    return {'app_brief_long': brief_long,
             'app_download_url': tag_download_area.strip()}
 
+
+# html_test = get_html('http://www.mumayi.com/android-1085176.html')
 # print(parse_app_details(html_test))
