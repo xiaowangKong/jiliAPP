@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from bs4 import BeautifulSoup,NavigableString,Tag
-from request_wrapper import extract_text,get_html,get_redirect_url
+from bs4 import BeautifulSoup, NavigableString, Tag
+from request_wrapper import extract_text, get_html, get_redirect_url
+
 html_test = '''
 you can paste HTML code here for debugging html_parser_xxx
 '''
@@ -22,7 +23,7 @@ def parse_app_list(html_code):
     res_list = []
 
     for tag_app in tag_app_list:
-        tag_app_link = tag_app.find('div',attrs={'class':'app_info'})
+        tag_app_link = tag_app.find('div', attrs={'class': 'app_info'})
         assert tag_app_link
         tag_app_name = tag_app_link.find('span', attrs={'class': 'app_name'})
         assert tag_app_name
@@ -62,23 +63,27 @@ def parse_app_details(html_code):
     assert tag_brief_long
     tag_brief_long = extract_text(tag_brief_long)
     assert tag_brief_long
-    #print("hehe")
-    #print(tag_brief_long)
+    # print("hehe")
+    # print(tag_brief_long)
     '''
     for tag in tag_brief_longs:
         tag_brief_long = tag
         break
     '''
-    tag_download_area = soup.find('div',attrs={'class':'detail_down'})
+    tag_download_area = soup.find('div', attrs={'class': 'detail_down'})
     assert tag_download_area
-    tag_download_area = tag_download_area.find('a',attrs={'title':'下载到电脑'})
+    tag_download_area = tag_download_area.find('a', attrs={'title': '下载到电脑'})
     assert tag_download_area
     tag_download_area = tag_download_area.get('onclick')
     assert tag_download_area
     tag_download_area = tag_download_area.strip().split("(")[1].split(")")[0]
-    assert tag_download_area  #get id in "opendown(id)"
+    assert tag_download_area  # get id in "opendown(id)"
+
+    jump_url = 'http://www.anzhi.com/dl_app.php?s=' + tag_download_area.strip()
+    real_url = get_redirect_url(jump_url)
     return {'app_brief_long': tag_brief_long.strip(),
-            'app_download_url': tag_download_area.strip()}
+            'app_download_url': real_url}
+
 
 '''debug
 html_code = get_html("http://www.anzhi.com/search.php?keyword=%E6%83%A0%E9%94%81%E5%B1%8F")
@@ -88,6 +93,9 @@ html_code = get_html("http://www.anzhi.com/pkg/08d7_com.huaqian.html")
 res = parse_app_details(html_code)
 print(res)
 debug'''
-#link = "freeDownload(this,'http://103.231.68.98/McDonald/e/5736286/0/0/0/1525149030420/package_20901.1525149030420')"
-#print(link.split("\'")[1])
-#print(extract_text(p_tag))
+# link = "freeDownload(this,'http://103.231.68.98/McDonald/e/5736286/0/0/0/1525149030420/package_20901.1525149030420')"
+# print(link.split("\'")[1])
+# print(extract_text(p_tag))
+html_code = get_html("http://www.anzhi.com/pkg/08d7_com.huaqian.html")
+res = parse_app_details(html_code)
+print(res)
