@@ -61,7 +61,7 @@ def parse_app_details(html_code):
     assert tag_brief_long
     tag_brief_long = tag_brief_long.find('p')
     assert tag_brief_long
-    tag_brief_long = extract_text(tag_brief_long)
+    tag_brief_long = tag_brief_long.text
     assert tag_brief_long
     # print("hehe")
     # print(tag_brief_long)
