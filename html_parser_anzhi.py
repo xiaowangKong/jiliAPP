@@ -29,7 +29,7 @@ def parse_app_list(html_code):
         assert tag_app_name
         tag_app_name = tag_app_name.find('a')
         assert tag_app_name
-        app_name = extract_text(tag_app_name).strip()
+        app_name = tag_app_name.text.strip()
         assert app_name
         app_brief = tag_app_link.find('p')
         assert app_brief
@@ -96,6 +96,6 @@ debug'''
 # link = "freeDownload(this,'http://103.231.68.98/McDonald/e/5736286/0/0/0/1525149030420/package_20901.1525149030420')"
 # print(link.split("\'")[1])
 # print(extract_text(p_tag))
-html_code = get_html("http://www.anzhi.com/pkg/08d7_com.huaqian.html")
-res = parse_app_details(html_code)
-print(res)
+# html_code = get_html("http://www.anzhi.com/pkg/08d7_com.huaqian.html")
+# res = parse_app_details(html_code)
+# print(res)
