@@ -13,6 +13,8 @@ from html_parser_baidu import parse_app_list as parse_app_list_baidu, parse_app_
 from html_parser_xiaomi import parse_app_list as parse_app_list_xiaomi, parse_app_details as parse_app_details_xiaomi
 from html_parser_mumayi import parse_app_list as parse_app_list_mumayi, parse_app_details as parse_app_details_mumayi
 from html_parser_wandoujia import parse_app_list as parse_app_list_wandoujia, parse_app_details as parse_app_details_wandoujia
+from html_parser_appchina import parse_app_list as parse_app_list_appchina, parse_app_details as parse_app_details_appchina
+from html_parser_anzhi import parse_app_list as parse_app_list_anzhi, parse_app_details as parse_app_details_anzhi
 from file_saver import append_file, write_file
 
 
@@ -140,7 +142,12 @@ def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PA
                        '木蚂蚁': {'func_parse_app_list': parse_app_list_mumayi,
                                'func_parse_app_details': parse_app_details_mumayi},
                        '豌豆荚':{'func_parse_app_list': parse_app_list_wandoujia,
-                              'func_parse_app_details': parse_app_details_wandoujia}
+                              'func_parse_app_details': parse_app_details_wandoujia},
+                       '应用汇':{'func_parse_app_list': parse_app_list_appchina,
+                              'func_parse_app_details': parse_app_details_appchina},
+                       '安智':{'func_parse_app_list': parse_app_list_anzhi,
+                              'func_parse_app_details': parse_app_details_anzhi}
+
                        }
 
     pool = ThreadPool(processes=PARALLELISM)

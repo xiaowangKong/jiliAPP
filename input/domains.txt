@@ -1,12 +1,12 @@
 # TODO  App store domains new
 #百度手机助手 http://shouji.baidu.com/s?wd=
 #小米应用商店 http://app.mi.com/search?keywords=
-#http://apk.hiapk.com/ not an appstore anymore, give up
 #木蚂蚁 http://s.mumayi.com/index.php?q=
+#豌豆荚 http://www.wandoujia.com/search?key=
+应用汇 http://www.appchina.com/sou/?keyword=
+#安智 http://www.anzhi.com/search.php?keyword=
+#http://apk.hiapk.com/ not an appstore anymore, give up
 #http://itunes.apple.com/
-豌豆荚 http://www.wandoujia.com/search?key=
-#http://www.appchina.com/
-#http://www.anzhi.com/
 #http://app.xiaomi.com/
 #http://cq01-un-web01.vm.baidu.com:8080/
 #http://pan.baidu.com/

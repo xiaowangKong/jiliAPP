@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup,NavigableString,Tag
-from request_wrapper import extract_text
+from request_wrapper import extract_text,extract_text_list,get_html
 html_test = '''
 you can paste HTML code here for debugging html_parser_xxx
 '''
@@ -52,10 +52,12 @@ def parse_app_details(html_code):
     assert tag_brief_long
     tag_brief_long = tag_brief_long.find('div',attrs={'class':'con','itemprop':'description'})
     if tag_brief_long.find_all('p'):
-        tag_brief_long = extract_text(tag_brief_long.find_all('p'))
+        tag_brief_long = extract_text_list(tag_brief_long.find_all('p'))
         assert tag_brief_long
         print("hehe")
         print(tag_brief_long)
+    else:
+        tag_brief_long = extract_text(tag_brief_long)
     assert tag_brief_long
     '''
     for tag in tag_brief_longs:
@@ -70,7 +72,11 @@ def parse_app_details(html_code):
     tag_download_area = tag_download_area.find('a')
     # hehe = tag_brief_long.text
     # hehehe = hehe.replace("\r","")
-    return {'app_brief_long': tag_brief_long.text.strip(),
+    return {'app_brief_long': tag_brief_long.strip(),
             'app_download_url': tag_download_area.get('href').strip()}
 
 # print(parse_app_details(html_test))
+#for debug  http://www.wandoujia.com/apps/com.huawei.dbank.v7 ---no <p> </p>
+#html  = get_html("http://www.wandoujia.com/apps/org.ie365")   has only one <p> </p>
+#html = get_html("http://www.wandoujia.com/apps/com.huawei.dbank.v7")
+#res = parse_app_details(html)

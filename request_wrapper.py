@@ -87,22 +87,31 @@ url = get_redirect_url('http://www.wandoujia.com/apps/com.huaqian')
 print(url)
 
 def extract_text(input_tag):
-    text_list=[]
-    for input in input_tag:
-        text_list1 = [input.text]
-        #print("input_tag.text=%s" % text_list )
-        next_s = input_tag.next_sibling
+    text_list = [input_tag.text]
+    #print("input_tag.text=%s" % text_list )
+    next_s = input_tag.next_sibling
+    #print("next_s")
+    #print(next_s)
+    while next_s and isinstance(next_s,NavigableString):
+        text_list.append(str(next_s))
+        next_s = next_s.next_sibling
         #print("next_s")
         #print(next_s)
+
+    return "".join(text_list)
+
+def extract_text_list(input_tag):
+    text_list = []
+    for input in input_tag:
+        text_list1 = [input.text]
+    #print("input_tag.text=%s" % text_list )
+        next_s = input.next_sibling
+    #print("next_s")
+    #print(next_s)
         while next_s and isinstance(next_s,NavigableString):
             text_list1.append(str(next_s))
             next_s = next_s.next_sibling
-            #print("next_s")
-            #print(next_s)
+        #print("next_s")
+        #print(next_s)
         text_list.append("".join(text_list1))
-
     return "".join(text_list)
-#html_code = '<p>text1</br>text2</br>text3</p>'
-#soup =BeautifulSoup(html_code,'html.parser')
-#p_tag = soup.find('p')
-#print(extract_text(p_tag))
