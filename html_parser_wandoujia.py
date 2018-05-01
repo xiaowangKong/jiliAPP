@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from bs4 import BeautifulSoup
-
+from bs4 import BeautifulSoup,NavigableString,Tag
+from request_wrapper import extract_text
 html_test = '''
 you can paste HTML code here for debugging html_parser_xxx
 '''
@@ -51,10 +51,11 @@ def parse_app_details(html_code):
     tag_brief_long = tag.find('div', attrs={'class': 'desc-info'})
     assert tag_brief_long
     tag_brief_long = tag_brief_long.find('div',attrs={'class':'con','itemprop':'description'})
-    if(tag_brief_long.find('p') != None):
-        tag_brief_long = tag_brief_long.find('p')
+    if tag_brief_long.find_all('p'):
+        tag_brief_long = extract_text(tag_brief_long.find_all('p'))
+        assert tag_brief_long
         print("hehe")
-        print(tag_brief_long.text)
+        print(tag_brief_long)
     assert tag_brief_long
     '''
     for tag in tag_brief_longs:

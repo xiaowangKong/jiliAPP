@@ -109,7 +109,7 @@ def crawler_multi(function_mapper, search_entries, keyword):
     return app_info
 
 
-def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PARALLELISM=32, TASK_TIMEOUT=1000000):
+def main(keywords_file, domains_file, res_file, notfound_file, remained_file, PARALLELISM=32, TASK_TIMEOUT=10000000):
     search_entries = parse_keyvalue_new(domains_file)
     total_keywords = parse_list(keywords_file)
     keywords = total_keywords
