@@ -3,7 +3,7 @@ from urllib.request import Request, urlopen
 from urllib.parse import urlsplit, quote, urlunsplit
 from urllib.error import URLError
 from socket import timeout
-from bs4 import BeautifulSoup,NavigableString,Tag
+from bs4 import BeautifulSoup, NavigableString, Tag
 
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/47.0.2526.73 Chrome/47.0.2526.73 Safari/537.36'
 TIME_OUT = 1000
@@ -64,6 +64,7 @@ def get_html(url):  ##URL must be encoded!
 
     return page_code
 
+
 def get_redirect_url(url):  ##URL must be encoded!
     request = Request(url)
     request.add_header('User-Agent', USER_AGENT)
@@ -83,35 +84,33 @@ def get_redirect_url(url):  ##URL must be encoded!
 
     return resp_url
 
-url = get_redirect_url('http://www.wandoujia.com/apps/com.huaqian')
-print(url)
+
+# url = get_redirect_url('http://www.wandoujia.com/apps/com.huaqian')
+# print(url)
 
 def extract_text(input_tag):
     text_list = [input_tag.text]
-    #print("input_tag.text=%s" % text_list )
-    next_s = input_tag.next_sibling
-    #print("next_s")
-    #print(next_s)
-    while next_s and isinstance(next_s,NavigableString):
+    next_s = input_tag.next_element
+
+    while next_s and isinstance(next_s, NavigableString):
         text_list.append(str(next_s))
-        next_s = next_s.next_sibling
-        #print("next_s")
-        #print(next_s)
+        next_s = next_s.next_element
 
     return "".join(text_list)
+
 
 def extract_text_list(input_tag):
     text_list = []
     for input in input_tag:
         text_list1 = [input.text]
-    #print("input_tag.text=%s" % text_list )
+        # print("input_tag.text=%s" % text_list )
         next_s = input.next_sibling
-    #print("next_s")
-    #print(next_s)
-        while next_s and isinstance(next_s,NavigableString):
+        # print("next_s")
+        # print(next_s)
+        while next_s and isinstance(next_s, NavigableString):
             text_list1.append(str(next_s))
             next_s = next_s.next_sibling
-        #print("next_s")
-        #print(next_s)
+        # print("next_s")
+        # print(next_s)
         text_list.append("".join(text_list1))
     return "".join(text_list)
